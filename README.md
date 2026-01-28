@@ -49,17 +49,67 @@ php -S localhost:8080 -t public
 
 ## Creating a New App from This Framework
 
-```bash
-# Option 1: GitHub template (if configured)
-gh repo create my-new-app --template mediatoring/webklient_app_framework
+This framework is designed as a **starter template** for all your applications. Each new app gets its own copy of the framework codebase.
 
-# Option 2: Clone and reinitialize
+### Option 1: GitHub Template Repository (recommended)
+
+Set this repo as a GitHub template (Settings > Template repository), then:
+
+```bash
+# Via GitHub CLI
+gh repo create my-new-app --template mediatoring/webklient_app_framework --private
+
+# Or click "Use this template" on the GitHub repo page
+```
+
+This creates a fresh repo with no commit history from the framework.
+
+### Option 2: Clone and Reinitialize
+
+```bash
 git clone https://github.com/mediatoring/webklient_app_framework.git my-new-app
 cd my-new-app
 rm -rf .git
 git init
-git add . && git commit -m "Initial commit from WebklientApp Framework"
+git add .
+git commit -m "Initial commit from WebklientApp Framework"
+
+# Push to your new repo
+git remote add origin git@github.com:mediatoring/my-new-app.git
+git push -u origin main
 ```
+
+### Option 3: Keep Framework as Upstream (for pulling updates)
+
+If you want to receive framework updates in your app:
+
+```bash
+git clone https://github.com/mediatoring/webklient_app_framework.git my-new-app
+cd my-new-app
+
+# Rename origin to framework
+git remote rename origin framework
+
+# Add your app's repo as origin
+git remote add origin git@github.com:mediatoring/my-new-app.git
+git push -u origin main
+
+# Later, pull framework updates:
+git fetch framework
+git merge framework/main --allow-unrelated-histories
+```
+
+### After Cloning
+
+```bash
+cd my-new-app/backend
+composer install
+cp .env.example .env
+# Edit .env with your database credentials, API keys, etc.
+php bin/install.php
+```
+
+The install script auto-generates `APP_KEY` and `JWT_SECRET`, runs all migrations, creates default roles/permissions, and creates the sudo user with a random password.
 
 ## Project Structure
 

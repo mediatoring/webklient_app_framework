@@ -91,6 +91,14 @@ class Request
         return $this->query[$key] ?? $default;
     }
 
+    /**
+     * Alias for query() - get a query string parameter.
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return $this->query[$key] ?? $default;
+    }
+
     public function input(string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {

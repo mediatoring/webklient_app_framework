@@ -145,14 +145,9 @@ class AdminController extends BaseController
         $originalUserId = $request->getAttribute('user_id');
 
         $config = ConfigLoader::getInstance();
-        $jwt = new JWTService(
-            $config->env('JWT_SECRET'),
-            (int) $config->env('JWT_ACCESS_TTL', 900),
-            (int) $config->env('JWT_REFRESH_TTL', 2592000),
-            $config->env('JWT_ALGO', 'HS256'),
-        );
+        $jwt = new JWTService($config->get('auth.jwt'));
 
-        $accessToken = $jwt->generateAccessToken($targetUserId, [
+        $accessToken = $jwt->createAccessToken($targetUserId, [
             'impersonated_by' => $originalUserId,
         ]);
 
