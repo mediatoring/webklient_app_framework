@@ -1,0 +1,40 @@
+{
+    "name": "webklient/app-framework",
+    "description": "WebklientApp Framework - Universal headless API-first application framework",
+    "type": "project",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.2",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "firebase/php-jwt": "^6.10"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WebklientApp\\Core\\": "core/",
+            "WebklientApp\\Modules\\": "modules/",
+            "WebklientApp\\Config\\": "config/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WebklientApp\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "install-app": "php bin/install.php",
+        "migrate": "php bin/migrate.php"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

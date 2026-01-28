@@ -1,0 +1,30 @@
+# Dependencies
+/backend/vendor/
+
+# Environment
+/backend/.env
+
+# Storage (keep structure, ignore contents)
+/backend/storage/logs/*
+/backend/storage/cache/*
+/backend/storage/uploads/*
+/backend/storage/archive/*
+!backend/storage/**/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend build
+/frontend/node_modules/
+/frontend/dist/
+
+# Testing
+/backend/.phpunit.result.cache
+/backend/coverage/
