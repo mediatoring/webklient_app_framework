@@ -8,7 +8,8 @@ class Sanitizer
 {
     public static function string(mixed $value): string
     {
-        return htmlspecialchars(trim((string) $value), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $str = str_replace("\0", '', (string) $value);
+        return htmlspecialchars(trim($str), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     public static function email(string $value): string
@@ -18,17 +19,22 @@ class Sanitizer
 
     public static function url(string $value): string
     {
-        return filter_var(trim($value), FILTER_SANITIZE_URL) ?: '';
+        $url = filter_var(trim($value), FILTER_SANITIZE_URL) ?: '';
+        return htmlspecialchars($url, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     public static function integer(mixed $value): int
     {
-        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        return intval($value);
     }
 
     public static function filename(string $value): string
     {
-        return preg_replace('/[^a-zA-Z0-9._-]/', '', $value);
+        $value = str_replace("\0", '', $value);
+        $value = basename($value);
+        $value = preg_replace('/[^a-zA-Z0-9._-]/', '', $value);
+        $value = preg_replace('/\.{2,}/', '.', $value);
+        return ltrim($value, '.');
     }
 
     /**

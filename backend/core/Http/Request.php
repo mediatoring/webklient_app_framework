@@ -83,7 +83,7 @@ class Request
         return $this->uri;
     }
 
-    public function query(string $key = null, mixed $default = null): mixed
+    public function query(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->query;
@@ -99,7 +99,7 @@ class Request
         return $this->query[$key] ?? $default;
     }
 
-    public function input(string $key = null, mixed $default = null): mixed
+    public function input(?string $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
             return $this->body;
@@ -126,17 +126,34 @@ class Request
     {
         $auth = $this->header('authorization', '');
         if (str_starts_with($auth, 'Bearer ')) {
-            return substr($auth, 7);
+            $token = substr($auth, 7);
+            $token = str_replace(["\r", "\n", "\0"], '', $token);
+            return $token !== '' ? $token : null;
         }
         return null;
     }
 
+    /**
+     * Get client IP. X-Forwarded-For returns only the first (client) IP
+     * to prevent spoofing via chained proxy headers.
+     */
     public function ip(): string
     {
-        return $this->server['HTTP_X_FORWARDED_FOR']
-            ?? $this->server['HTTP_X_REAL_IP']
-            ?? $this->server['REMOTE_ADDR']
-            ?? '0.0.0.0';
+        $forwarded = $this->server['HTTP_X_FORWARDED_FOR'] ?? null;
+        if ($forwarded !== null) {
+            $ips = array_map('trim', explode(',', $forwarded));
+            $first = $ips[0] ?? '';
+            if (filter_var($first, FILTER_VALIDATE_IP)) {
+                return $first;
+            }
+        }
+
+        $realIp = $this->server['HTTP_X_REAL_IP'] ?? null;
+        if ($realIp !== null && filter_var($realIp, FILTER_VALIDATE_IP)) {
+            return $realIp;
+        }
+
+        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
     public function userAgent(): string
