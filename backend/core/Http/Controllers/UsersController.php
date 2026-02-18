@@ -10,9 +10,20 @@ use WebklientApp\Core\Exceptions\NotFoundException;
 use WebklientApp\Core\Exceptions\ValidationException;
 use WebklientApp\Core\Security\Hash;
 use WebklientApp\Core\Validation\Validator;
+use WebklientApp\Core\Mail\MailService;
+use WebklientApp\Core\ConfigLoader;
 
 class UsersController extends BaseController
 {
+    private Hash $hasher;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $config = ConfigLoader::getInstance();
+        $this->hasher = new Hash((int) $config->env('BCRYPT_ROUNDS', 12));
+    }
+
     public function index(Request $request): JsonResponse
     {
         $p = $this->paginationParams($request);
@@ -64,13 +75,24 @@ class UsersController extends BaseController
         $id = $this->query->table('users')->insert([
             'username' => $data['username'],
             'email' => strtolower($data['email']),
-            'password_hash' => Hash::make($data['password']),
+            'password_hash' => $this->hasher->make($data['password']),
             'display_name' => $data['display_name'] ?? $data['username'],
             'is_active' => 1,
         ]);
 
         $user = $this->findUser((int) $id);
         unset($user['password_hash']);
+
+        try {
+            $mail = new MailService();
+            $mail->sendWelcome(
+                $user['email'],
+                $user['display_name'] ?? $user['username'],
+                $user['username']
+            );
+        } catch (\Throwable) {
+            // Mail delivery is best-effort
+        }
 
         return JsonResponse::created($user, "/api/users/{$id}");
     }
@@ -171,12 +193,12 @@ class UsersController extends BaseController
         }
 
         $user = $this->findUser($userId);
-        if (!Hash::verify($data['current_password'], $user['password_hash'])) {
+        if (!$this->hasher->verify($data['current_password'], $user['password_hash'])) {
             throw new ValidationException('Validation failed.', ['current_password' => ['Current password is incorrect.']]);
         }
 
         $this->query->table('users')->where('id', $userId)->update([
-            'password_hash' => Hash::make($data['password']),
+            'password_hash' => $this->hasher->make($data['password']),
         ]);
 
         return JsonResponse::success(null, 'Password changed.');

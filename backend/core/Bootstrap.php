@@ -9,6 +9,7 @@ use WebklientApp\Core\Http\Router;
 use WebklientApp\Core\Http\Request;
 use WebklientApp\Core\Http\JsonResponse;
 use WebklientApp\Core\Exceptions\ExceptionHandler;
+use WebklientApp\Core\Auth\DeveloperGuard;
 
 class Bootstrap
 {
@@ -28,6 +29,7 @@ class Bootstrap
         $this->setErrorHandling();
         $this->setTimezone();
         $this->validateRequiredConfig();
+        $this->enforceDeveloperGuard();
     }
 
     private function setErrorHandling(): void
@@ -50,6 +52,16 @@ class Bootstrap
     private function validateRequiredConfig(): void
     {
         $this->config->require('APP_KEY');
+    }
+
+    private function enforceDeveloperGuard(): void
+    {
+        try {
+            $guard = new DeveloperGuard($this->getDatabase());
+            $guard->enforce();
+        } catch (\Throwable) {
+            // DB not available yet (pre-install), skip silently
+        }
     }
 
     public function getConfig(): ConfigLoader

@@ -9,6 +9,7 @@ use WebklientApp\Core\Http\JsonResponse;
 use WebklientApp\Core\Exceptions\NotFoundException;
 use WebklientApp\Core\Exceptions\ValidationException;
 use WebklientApp\Core\Validation\Validator;
+use WebklientApp\Core\Auth\DeveloperGuard;
 
 class PermissionsController extends BaseController
 {
@@ -108,6 +109,8 @@ class PermissionsController extends BaseController
             'module' => $data['module'],
             'is_system' => 0,
         ]);
+
+        (new DeveloperGuard($this->db))->grantNewPermission((int) $id);
 
         $perm = $this->query->table('permissions')->where('id', (int) $id)->first();
         return JsonResponse::created($perm);

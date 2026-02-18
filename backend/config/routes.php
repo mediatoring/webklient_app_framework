@@ -25,6 +25,8 @@ $router->group('/api/auth', [], function ($router) {
     $router->post('/logout', [\WebklientApp\Core\Auth\AuthController::class, 'logout'])
         ->middleware('auth');
     $router->post('/refresh', [\WebklientApp\Core\Auth\AuthController::class, 'refresh']);
+    $router->post('/forgot-password', [\WebklientApp\Core\Http\Controllers\PasswordResetController::class, 'forgotPassword']);
+    $router->post('/reset-password', [\WebklientApp\Core\Http\Controllers\PasswordResetController::class, 'resetPassword']);
 });
 
 // User routes (authenticated)
